@@ -1,0 +1,36 @@
+import { FaUsers } from 'react-icons/fa6'
+import { Logo } from './Logo'
+import { FaCalculator, FaChartBar, FaFileAlt, FaHome, FaTools  } from "react-icons/fa"
+
+export function Nav(){
+
+    return(
+       <div className='h-screen w-64 bg-[#A28567] text-white flex flex-col p-4 shadow-lg'>
+            <h1 className='mb-10'> <Logo /> </h1>
+
+            <nav className='flex flex-col gap-4'>
+                <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                  <FaHome className='w-5 h-5'/> Dashboard
+                </a>
+                <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                   <FaCalculator className="w-5 h-5" /> Calculadora
+                </a>
+                <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                     <FaChartBar className="w-5 h-5" /> Análise de Orçamento
+                </a>
+                 <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                     <FaUsers className="w-5 h-5" /> Pacientes
+                </a>
+                 <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                     <FaFileAlt className="w-5 h-5" /> Relatórios
+                </a>
+                 <a href="#" className=' flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition'>
+                     < FaTools className="w-5 h-5" /> Configurações
+                </a>
+
+            </nav>
+       </div>
+
+        
+    )
+}
