@@ -1,28 +1,74 @@
-import { FaUsers } from 'react-icons/fa6'
-import { Logo } from './Logo'
-import { FaCalculator, FaChartBar, FaFileAlt, FaHome } from "react-icons/fa"
+import { NavLink } from 'react-router-dom';
+import { FaUsers } from 'react-icons/fa6';
+import { Logo } from './Logo';
+import { FaCalculator, FaChartBar, FaFileAlt, FaHome } from "react-icons/fa";
 
 export function Nav() {
     return (
-       <div className='fixed h-screen w-64 bg-[#A28567] text-white flex flex-col p-4 shadow-lg z-50'>
-            <h1 className='mb-10'> <Logo /> </h1>
+       <div className='fixed h-screen w-56 bg-[#A28567] text-white flex flex-col p-4 z-50'>
+            <h1 className='mb-6'> <Logo /> </h1>
 
-            <nav className='flex flex-col gap-4'>
-                <a href="#" className='flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition font-thin'>
-                  <FaHome className='w-5 h-5'/> Dashboard
-                </a>
-                <a href="#" className='flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition font-thin'>
-                   <FaCalculator className="w-5 h-5" /> Calculadora
-                </a>
-                <a href="#" className='flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition font-thin'>
-                     <FaChartBar className="w-5 h-5" /> Análise de Orçamento
-                </a>
-                 <a href="#" className='flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition font-thin'>
-                     <FaUsers className="w-5 h-5" /> Pacientes
-                </a>
-                 <a href="#" className='flex gap-2 items-center hover:bg-white hover:text-[#A28567] p-2 rounded transition font-thin'>
-                     <FaFileAlt className="w-5 h-5" /> Relatórios
-                </a>
+            <nav className='flex flex-col gap-1'>
+                <NavLink 
+                    to="/dashboard"
+                    className={({ isActive }) => 
+                        `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
+                            isActive 
+                                ? 'bg-white text-[#5e4d3b]' 
+                                : 'hover:bg-white hover:text-[#5e4d3b]'
+                        }`
+                    }
+                >
+                    <FaHome className='w-4 h-4'/> Dashboard
+                </NavLink>
+                <NavLink 
+                    to="/calculadora"
+                    className={({ isActive }) => 
+                        `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
+                            isActive 
+                                ? 'bg-white text-[#5e4d3b]' 
+                                : 'hover:bg-white hover:text-[#5e4d3b]'
+                        }`
+                    }
+                >
+                    <FaCalculator className="w-4 h-4" /> Calculadora
+                </NavLink>
+                <NavLink 
+                    to="/analise"
+                    className={({ isActive }) => 
+                        `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
+                            isActive 
+                                ? 'bg-white text-[#5e4d3b]' 
+                                : 'hover:bg-white hover:text-[#5e4d3b]'
+                        }`
+                    }
+                >
+                    <FaChartBar className="w-4 h-4" /> Análise de Orçamento
+                </NavLink>
+                <NavLink 
+                    to="/pacientes"
+                    className={({ isActive }) => 
+                        `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
+                            isActive 
+                                ? 'bg-white text-[#5e4d3b]' 
+                                : 'hover:bg-white hover:text-[#5e4d3b]'
+                        }`
+                    }
+                >
+                    <FaUsers className="w-4 h-4" /> Pacientes
+                </NavLink>
+                <NavLink 
+                    to="/relatorios"
+                    className={({ isActive }) => 
+                        `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
+                            isActive 
+                                ? 'bg-white text-[#5e4d3b]' 
+                                : 'hover:bg-white hover:text-[#5e4d3b]'
+                        }`
+                    }
+                >
+                    <FaFileAlt className="w-4 h-4" /> Relatórios
+                </NavLink>
             </nav>
        </div>
     )

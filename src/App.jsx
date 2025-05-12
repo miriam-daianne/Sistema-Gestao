@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Calculadora } from "./pages/Calculadora"
+import { Pacientes } from "./pages/Pacientes"
 
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   <BrowserRouter>
     <Routes>
       <Route path="/calculadora" element={<Calculadora />} />
+      <Route path="/pacientes" element={<Pacientes />}/>
     </Routes>
   </BrowserRouter>
   )
