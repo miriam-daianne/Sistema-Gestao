@@ -66,7 +66,7 @@ export function Calc() {
   return (
     <div className="max-w-4xl p-6">
       <div className="mb-8">
-              <h1 className="text-lg font-medium text-gray-500 mb-2">Calculadora de Comissões</h1>
+              <h1 className="text-lg font-medium text-[#A28567] mb-2">Calculadora de Comissões</h1>
       <p className="text-sm text-gray-400 mb-6">Calcule comissões e analise a viabilidade de orçamentos</p>
         <h4 className="text-lg font-medium text-gray-500 mb-2">Paciente</h4>
         <select

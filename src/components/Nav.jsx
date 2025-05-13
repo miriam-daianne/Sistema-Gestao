@@ -58,7 +58,7 @@ export function Nav() {
                     <FaUsers className="w-4 h-4" /> Pacientes
                 </NavLink>
                 <NavLink 
-                    to="/relatorios"
+                    to="/relatorio"
                     className={({ isActive }) => 
                         `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
                             isActive 

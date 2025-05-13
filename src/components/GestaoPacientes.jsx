@@ -54,7 +54,7 @@ export function GestaoPacientes() {
 
   return (
     <div className="max-w-4xl p-6">
-      <h1 className="text-lg font-medium text-gray-500 mb-2">Gestão de Pacientes</h1>
+      <h1 className="text-lg font-medium text-[#A28567] mb-2">Gestão de Pacientes</h1>
       <p className="text-sm text-gray-400 mb-6">Gerenciamento de pacientes e cálculo de comissões por atendimento</p>
 
       {/* Campo de busca */}
