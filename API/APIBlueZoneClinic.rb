@@ -34,7 +34,7 @@ class Tratamento < ApplicationRecord
   validates :preco, :custo, numericality: { greater_than_or_equal_to: 0 }
   
   # Adicionar o campo status para identificar tratamentos concluídos/agendados
-  # rails generate migration AddStatusToTratamentos status:string
+  rails generate migration AddStatusToTratamentos status:string
 end
 
 # app/models/profissional.rb
