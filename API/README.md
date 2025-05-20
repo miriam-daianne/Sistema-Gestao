@@ -27,10 +27,11 @@ API/<br>
 │   ├── routes.rb<br>
 │   └── ...<br>
 └── db/<br>
-    └── migrate/<br>
-        ├── AddStatusToConsultas.rb<br>
-        ├── AddStatusToTratamentos.rb<br>
-        └── AddClienteIdToPacientes.rb<br><br>
+    └── seeds.rb<br>
+└── migrate/<br>
+    ├── AddStatusToConsultas.rb<br>
+    ├── AddStatusToTratamentos.rb<br>
+    └── AddClienteIdToPacientes.rb<br><br>
 
 
 <h2>Relações entre os Modelos</h2>
