@@ -84,7 +84,9 @@ export function Cadastro() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-sm text-gray-700">Data de Nascimento</label>
+              <label className="text-sm text-gray-700">
+                Data de Nascimento
+              </label>
               <input
                 type="date"
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
@@ -92,10 +94,11 @@ export function Cadastro() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-sm text-gray-700">Endereço</label>
+              <label className="text-sm text-gray-700">
+                Objetivo do Tratamento
+              </label>
               <input
                 type="text"
-                placeholder="Rua, número, bairro, cidade"
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
               />
             </div>
@@ -112,3 +115,4 @@ export function Cadastro() {
     </div>
   );
 }
+
