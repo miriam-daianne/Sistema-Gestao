@@ -1,6 +1,5 @@
 import { Nav } from "../components/Nav";
 import { Menu } from "../components/Menu";
-import { Container } from "../components/Container";
 import { CardRelatorio } from "../components/CardRelatorio";
 import { RelatorioTratamentos } from "../components/RelatorioTratamentos";
 import { useState, useEffect } from "react";
@@ -25,9 +24,7 @@ export function Relatorio() {
       setLoading(true);
       
       const data = {
-        tratamentos: [
-          // dados fictícios
-        ],
+        tratamentos: [],
         metricas: {
           totalTratamentos: '7',
           valorTotal: 17680.00,
@@ -62,55 +59,58 @@ export function Relatorio() {
         </h2>
         <Menu />
 
-        <Container
-          titulo="Relatórios"
-          subtitulo="Visualize e exporte dados de tratamentos e comissões"
-        >
-          <div className="max-w-4xl p-6">
-            <div className="mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <CardRelatorio
-                  titulo="Total de Tratamentos"
-                  subtitulo="Número de procedimentos"
-                  valor={metricas.totalTratamentos}
-                  infoAdicional={
-                    <>
-                      <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-                        {metricas.tratamentosConcluidos} concluídos
-                      </span>
-                      <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
-                        {metricas.tratamentosAgendados} agendados
-                      </span>
-                    </>
-                  }
-                />
+        {/* Aqui está o conteúdo que antes estava dentro do Container */}
+        <div>
+          <br />
+          <h3 className="text-2xl font-semibold mb-2">Relatórios</h3>
+          <p className="text-gray-600 mb-6">Visualize e exporte dados de tratamentos e comissões</p>
 
-                <CardRelatorio
-                  titulo="Valor Total"
-                  subtitulo="Receita gerada"
-                  valor={metricas.valorTotal}
-                  infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
-                />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <CardRelatorio
+              titulo="Total de Tratamentos"
+              subtitulo="Número de procedimentos"
+              valor={metricas.totalTratamentos}
+              infoAdicional={
+                <>
+                  <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
+                    {metricas.tratamentosConcluidos} concluídos
+                  </span>
+                  <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
+                    {metricas.tratamentosAgendados} agendados
+                  </span>
+                </>
+              }
+            />
 
-                <CardRelatorio
-                  titulo="Média por Tratamento"
-                  subtitulo="Valor médio"
-                  valor={metricas.mediaPorTratamento}
-                  infoAdicional={`Período: ${periodo === 'ultima-semana' ? 'Última semana' : 
-                               periodo === 'ultimo-mes' ? 'Último mês' : 'Personalizado'}`}
-                />
-              </div>
+            <CardRelatorio
+              titulo="Valor Total"
+              subtitulo="Receita gerada"
+              valor={metricas.valorTotal}
+              infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
+            />
 
-              <RelatorioTratamentos
-                tratamentos={tratamentos}
-                loading={loading}
-                error={error}
-                periodo={periodo}
-                setPeriodo={setPeriodo}
-              />
-            </div>
+            <CardRelatorio
+              titulo="Média por Tratamento"
+              subtitulo="Valor médio"
+              valor={metricas.mediaPorTratamento}
+              infoAdicional={`Período: ${
+                periodo === 'ultima-semana'
+                  ? 'Última semana'
+                  : periodo === 'ultimo-mes'
+                  ? 'Último mês'
+                  : 'Personalizado'
+              }`}
+            />
           </div>
-        </Container>
+
+          <RelatorioTratamentos
+            tratamentos={tratamentos}
+            loading={loading}
+            error={error}
+            periodo={periodo}
+            setPeriodo={setPeriodo}
+          />
+        </div>
       </div>
     </div>
   );
