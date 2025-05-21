@@ -58,13 +58,17 @@ export function Orcamento() {
           Sistema de Cálculo de Comissão e Análise de Orçamentos
         </h2>
         <Menu />
-        
+
         <Container>
           <div className="max-w-4xl p-6">
             <div className="mb-8">
-              <h1 className="text-lg font-medium text-[#A28567] mb-2">Análise de Orçamentos</h1>
-              <p className="text-sm text-gray-400 mb-6">Gerencie e acompanhe todos os orçamentos da clínica</p>
-              
+              <h1 className="text-lg font-medium text-[#A28567] mb-2">
+                Análise de Orçamentos
+              </h1>
+              <p className="text-sm text-gray-400 mb-6">
+                Gerencie e acompanhe todos os orçamentos da clínica
+              </p>
+
               {/* Abas */}
               <div className="flex gap-2 mb-6">
                 <button
@@ -96,25 +100,54 @@ export function Orcamento() {
                     <table className="min-w-full bg-white border border-gray-200 rounded-lg flex flex-col gap-4">
                       <thead>
                         <tr className="border-b border-gray-200  flex justify-between gap-10 ml-2">
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">ID</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Paciente</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Data</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Valor Total</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Margem Final</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Status</th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">Ações</th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            ID
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Paciente
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Data
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Valor Total
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Margem Final
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Status
+                          </th>
+                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                            Ações
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="flex flex-col gap-6">
                         {orcamentos.map((item, index) => (
-                          <tr key={index} className="border-b border-gray-100 flex justify-between ">
-                            <td className="py-2 px-3 text-sm text-gray-600">{item.id}</td>
-                            <td className="py-2 px-3 text-sm text-gray-600">{item.paciente}</td>
-                            <td className="py-2 px-3 text-sm text-gray-600 ">{item.data}</td>
-                            <td className="py-2 px-3 text-sm text-gray-600 " >{item.valor}</td>
-                            <td className={`py-2 px-3 text-sm  ${
-                              item.margem.startsWith("-") ? "text-red-500" : "text-green-500"
-                            }`}>
+                          <tr
+                            key={index}
+                            className="border-b border-gray-100 flex justify-between "
+                          >
+                            <td className="py-2 px-3 text-sm text-gray-600">
+                              {item.id}
+                            </td>
+                            <td className="py-2 px-3 text-sm text-gray-600">
+                              {item.paciente}
+                            </td>
+                            <td className="py-2 px-3 text-sm text-gray-600 ">
+                              {item.data}
+                            </td>
+                            <td className="py-2 px-3 text-sm text-gray-600 ">
+                              {item.valor}
+                            </td>
+                            <td
+                              className={`py-2 px-3 text-sm  ${
+                                item.margem.startsWith("-")
+                                  ? "text-red-500"
+                                  : "text-green-500"
+                              }`}
+                            >
                               {item.margem}
                             </td>
                             <td className="py-2 px-3">
@@ -150,4 +183,4 @@ export function Orcamento() {
       </div>
     </div>
   );
-} 
+}
