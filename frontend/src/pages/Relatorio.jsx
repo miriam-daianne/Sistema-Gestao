@@ -24,10 +24,9 @@ export function Relatorio() {
     try {
       setLoading(true);
       
-    
       const data = {
         tratamentos: [
-   
+          // dados fictícios
         ],
         metricas: {
           totalTratamentos: '7',
@@ -67,46 +66,50 @@ export function Relatorio() {
           titulo="Relatórios"
           subtitulo="Visualize e exporte dados de tratamentos e comissões"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <CardRelatorio
-              titulo="Total de Tratamentos"
-              subtitulo="Número de procedimentos"
-              valor={metricas.totalTratamentos}
-              infoAdicional={
-                <>
-                  <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    {metricas.tratamentosConcluidos} concluídos
-                  </span>
-                  <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
-                    {metricas.tratamentosAgendados} agendados
-                  </span>
-                </>
-              }
-            />
+          <div className="max-w-4xl p-6">
+            <div className="mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <CardRelatorio
+                  titulo="Total de Tratamentos"
+                  subtitulo="Número de procedimentos"
+                  valor={metricas.totalTratamentos}
+                  infoAdicional={
+                    <>
+                      <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
+                        {metricas.tratamentosConcluidos} concluídos
+                      </span>
+                      <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
+                        {metricas.tratamentosAgendados} agendados
+                      </span>
+                    </>
+                  }
+                />
 
-            <CardRelatorio
-              titulo="Valor Total"
-              subtitulo="Receita gerada"
-              valor={metricas.valorTotal}
-              infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
-            />
+                <CardRelatorio
+                  titulo="Valor Total"
+                  subtitulo="Receita gerada"
+                  valor={metricas.valorTotal}
+                  infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
+                />
 
-            <CardRelatorio
-              titulo="Média por Tratamento"
-              subtitulo="Valor médio"
-              valor={metricas.mediaPorTratamento}
-              infoAdicional={`Período: ${periodo === 'ultima-semana' ? 'Última semana' : 
-                           periodo === 'ultimo-mes' ? 'Último mês' : 'Personalizado'}`}
-            />
+                <CardRelatorio
+                  titulo="Média por Tratamento"
+                  subtitulo="Valor médio"
+                  valor={metricas.mediaPorTratamento}
+                  infoAdicional={`Período: ${periodo === 'ultima-semana' ? 'Última semana' : 
+                               periodo === 'ultimo-mes' ? 'Último mês' : 'Personalizado'}`}
+                />
+              </div>
+
+              <RelatorioTratamentos
+                tratamentos={tratamentos}
+                loading={loading}
+                error={error}
+                periodo={periodo}
+                setPeriodo={setPeriodo}
+              />
+            </div>
           </div>
-
-          <RelatorioTratamentos
-            tratamentos={tratamentos}
-            loading={loading}
-            error={error}
-            periodo={periodo}
-            setPeriodo={setPeriodo}
-          />
         </Container>
       </div>
     </div>

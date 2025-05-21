@@ -34,7 +34,7 @@ export function Nav() {
                     <FaCalculator className="w-4 h-4" /> Calculadora
                 </NavLink>
                 <NavLink 
-                    to="/analise"
+                    to="/orcamento"
                     className={({ isActive }) => 
                         `flex gap-2 items-center p-2 rounded transition-colors text-sm font-medium ${
                             isActive 
