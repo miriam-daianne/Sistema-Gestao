@@ -4,6 +4,7 @@ import { CardRelatorio } from "../components/CardRelatorio";
 import { RelatorioTratamentos } from "../components/RelatorioTratamentos";
 import { useState, useEffect } from "react";
 import { formatarMoeda } from "../utils/formatadores";
+import axios from "axios";
 
 export function Relatorio() {
   const [tratamentos, setTratamentos] = useState([]);
@@ -23,32 +24,104 @@ export function Relatorio() {
     try {
       setLoading(true);
       
-      const data = {
-        tratamentos: [],
-        metricas: {
-          totalTratamentos: '7',
-          valorTotal: 17680.00,
-          mediaPorTratamento: 2525.71,
-          tratamentosConcluidos: 5,
-          tratamentosAgendados: 2,
-          comissaoTotal: 5304.00
-        }
+      // Define as datas com base no período selecionado
+      let startDate, endDate;
+      const now = new Date();
+      
+      if (periodo === 'ultima-semana') {
+        startDate = new Date(now.setDate(now.getDate() - 7));
+        endDate = new Date();
+      } else if (periodo === 'ultimo-mes') {
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      } else {
+        startDate = new Date(now.setDate(now.getDate() - 30)); // 30 dias como padrão
+        endDate = new Date();
+      }
+
+      // Formata as datas para o formato ISO
+      const startDateISO = startDate.toISOString().split('T')[0];
+      const endDateISO = endDate.toISOString().split('T')[0];
+
+      // Busca os dados da API
+      const [tratamentosResponse, metricasResponse] = await Promise.all([
+        axios.get("/api/v1/consultas", {
+          params: {
+            start_date: startDateISO,
+            end_date: endDateISO,
+            page: 1,
+            per_page: 10
+          }
+        }),
+        axios.get("/api/v1/consultas/dashboard", {
+          params: {
+            start_date: startDateISO,
+            end_date: endDateISO
+          }
+        })
+      ]);
+
+      // Processa os tratamentos
+      const tratamentosFormatados = tratamentosResponse.data.consultas?.map(consulta => ({
+        id: consulta.id,
+        data: consulta.data ? new Date(consulta.data).toLocaleDateString('pt-BR') : 'N/A',
+        paciente: consulta.paciente?.nome || 'N/A',
+        tratamento: consulta.tratamento?.nome || 'N/A',
+        valor: consulta.valor || 0,
+        profissional: consulta.profissional?.nome || 'N/A',
+        status: consulta.status === 'concluido' ? 'Finalizado' : 
+               consulta.status === 'agendado' ? 'Agendado' : 'Em andamento'
+      })) || [];
+
+      // Processa as métricas
+      const dashboardData = metricasResponse.data;
+      const metricasAtualizadas = {
+        totalTratamentos: dashboardData.total_tratamentos?.valor || 0,
+        valorTotal: dashboardData.receita?.total || 0,
+        mediaPorTratamento: dashboardData.media_tratamento?.valor || 0,
+        tratamentosConcluidos: dashboardData.total_tratamentos?.concluidos || 0,
+        tratamentosAgendados: dashboardData.total_tratamentos?.agendados || 0,
+        comissaoTotal: dashboardData.receita?.comissoes || 0
       };
 
-      setTratamentos(data.tratamentos);
-      setMetricas(data.metricas);
-      setLoading(false);
+      setTratamentos(tratamentosFormatados);
+      setMetricas(metricasAtualizadas);
       
     } catch (err) {
       setError("Erro ao carregar dados");
-      setLoading(false);
       console.error("Erro na requisição:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchDadosRelatorios();
   }, [periodo]);
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <Nav />
+        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+          <p>Carregando relatórios...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex">
+        <Nav />
+        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+          <div className="bg-red-100 text-red-800 p-4 rounded-lg">
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
@@ -59,7 +132,6 @@ export function Relatorio() {
         </h2>
         <Menu />
 
-        {/* Aqui está o conteúdo que antes estava dentro do Container */}
         <div>
           <br />
           <h3 className="text-2xl font-semibold mb-2">Relatórios</h3>

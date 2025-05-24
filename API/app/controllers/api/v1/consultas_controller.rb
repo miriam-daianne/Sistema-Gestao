@@ -46,6 +46,32 @@ module Api
           render json: { errors: consulta.errors }, status: :unprocessable_entity
         end
       end
+      # app/controllers/api/v1/consultas_controller.rb
+module Api
+  module V1
+    class ConsultasController < ApplicationController
+      # ... outras ações ...
+      
+      def create_orcamento
+        consulta = Consulta.new(
+          paciente_id: params[:paciente_id],
+          profissional_id: params[:comissoes].first[:profissional_id], # Ajuste conforme sua lógica
+          tratamento_id: params[:tratamentos].first[:id], # Ajuste conforme sua lógica
+          valor: params[:valor_total],
+          data: Time.current,
+          status: 'agendado'
+        )
+        
+        if consulta.save
+          # Aqui você pode criar registros adicionais para comissões, etc.
+          render json: consulta, status: :created
+        else
+          render json: { errors: consulta.errors }, status: :unprocessable_entity
+        end
+      end
+    end
+  end
+end
       
       def dashboard
         # Dados para o dashboard com estatísticas
@@ -81,9 +107,9 @@ module Api
         params.require(:consulta).permit(:data, :valor, :modo, :returns_count, :paciente_id, :profissional_id, :tratamento_id, :status)
       end
       
-      def calcular_total_comissoes
-        Consulta.joins(:profissional)
-               .sum('consultas.valor * profissionais.pct_comissao / 100')
+     def calcular_total_comissoes
+      Consulta.joins(:profissional)
+         .sum('consultas.valor * profissionais.pct_comissao / 100')
       end
     end
   end

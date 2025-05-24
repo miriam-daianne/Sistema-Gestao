@@ -1,8 +1,76 @@
-// components/RelatorioTratamentos.jsx
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { formatarMoeda } from "../utils/formatadores";
 
-export function RelatorioTratamentos({ tratamentos, loading, error, periodo, setPeriodo }) {
+export function RelatorioTratamentos({ periodo, setPeriodo }) {
+  const [tratamentos, setTratamentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTratamentos = async () => {
+      try {
+        setLoading(true);
+        
+        // Define o período para a API
+        let startDate, endDate;
+        const now = new Date();
+        
+        if (periodo === 'ultima-semana') {
+          startDate = new Date(now.setDate(now.getDate() - 7));
+          endDate = new Date();
+        } else if (periodo === 'ultimo-mes') {
+          startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        } else {
+          // Personalizado - você pode adicionar lógica para datas específicas
+          startDate = new Date(now.setDate(now.getDate() - 30)); // 30 dias como padrão
+          endDate = new Date();
+        }
+
+        // Formata as datas para o formato ISO
+        const startDateISO = startDate.toISOString().split('T')[0];
+        const endDateISO = endDate.toISOString().split('T')[0];
+
+        // Busca os tratamentos da API
+        const response = await axios.get("/api/v1/consultas", {
+          params: {
+            start_date: startDateISO,
+            end_date: endDateISO
+          }
+        });
+        
+        // Transforma os dados da API no formato esperado
+        const tratamentosFormatados = response.data.consultas.map(consulta => ({
+          id: consulta.id,
+          data: new Date(consulta.data).toLocaleDateString('pt-BR'),
+          paciente: consulta.paciente?.nome || 'N/A',
+          tratamento: consulta.tratamento?.nome || 'N/A',
+          valor: consulta.valor,
+          profissional: consulta.profissional?.nome || 'N/A',
+          status: traduzirStatus(consulta.status)
+        }));
+        
+        setTratamentos(tratamentosFormatados);
+      } catch (err) {
+        setError("Erro ao carregar tratamentos");
+        console.error("Erro:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchTratamentos();
+  }, [periodo]);
+
+  const traduzirStatus = (status) => {
+    switch(status) {
+      case 'concluido': return 'Finalizado';
+      case 'agendado': return 'Agendado';
+      default: return 'Em andamento';
+    }
+  };
+
   const getStatusClass = (status) => {
     switch(status) {
       case 'Finalizado': return 'bg-green-100 text-green-800';

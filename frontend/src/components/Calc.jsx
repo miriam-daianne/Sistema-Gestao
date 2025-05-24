@@ -1,29 +1,67 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export function Calc() {
-  const [pacientes] = useState([
-    { id: 1, nome: 'Paciente 1' },
-    { id: 2, nome: 'Paciente 2' },
-    { id: 3, nome: 'Paciente 3' },
-  ]);
+  const [pacientes, setPacientes] = useState([]);
   const [pacienteSelecionado, setPacienteSelecionado] = useState('');
-
   const [tratamentos, setTratamentos] = useState([
     { id: 1, nome: '', preco: 0, custo: 0, quantidade: 1, subtotal: 0 },
   ]);
-
   const [comissoes, setComissoes] = useState([]);
+  const [profissionais, setProfissionais] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const PROFISSIONAIS_DISPONIVEIS = [
-    { nome: 'Dra. Ana', valor: 50, percentual: 5 },
-    { nome: 'Dr. João', valor: 0, percentual: 20 },
-    { nome: 'Dra. Carla', valor: 30, percentual: 10 },
-  ];
+  // Configuração do Axios
+  const api = axios.create({
+    baseURL: 'http://localhost:3000/api/v1',
+    timeout: 5000,
+  });
+
+  // Buscar dados iniciais com tratamento de erro melhorado
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Verifique se o endpoint está correto
+        const pacientesEndpoint = '/pacientes';
+        const profissionaisEndpoint = '/profissionais';
+        
+        console.log(`Tentando acessar: ${api.defaults.baseURL}${pacientesEndpoint}`);
+        
+        const [pacientesRes, profissionaisRes] = await Promise.all([
+          api.get(pacientesEndpoint).catch(err => {
+            console.error('Erro ao buscar pacientes:', err);
+            throw err;
+          }),
+          api.get(profissionaisEndpoint).catch(err => {
+            console.error('Erro ao buscar profissionais:', err);
+            throw err;
+          })
+        ]);
+        
+        console.log('Resposta pacientes:', pacientesRes.data);
+        console.log('Resposta profissionais:', profissionaisRes.data);
+        
+        setPacientes(pacientesRes.data);
+        setProfissionais(profissionaisRes.data);
+      } catch (error) {
+        console.error('Erro detalhado:', error);
+        setError(`Erro ao carregar dados: ${error.response?.data?.message || error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   const adicionarTratamento = () => {
     setTratamentos([
       ...tratamentos,
-      { id: tratamentos.length + 1, nome: '', preco: 0, custo: 0, quantidade: 1, subtotal: 0 },
+      { id: tratamentos.length + 1, nome: '', preco: 0, custo: 0, quantidade: 1, subtotal: 0 }, 
     ]);
   };
 
@@ -44,16 +82,69 @@ export function Calc() {
   const adicionarComissao = () => {
     setComissoes([
       ...comissoes,
-      { id: comissoes.length + 1, nome: '', valor: 0, percentual: 0 },
+      { id: comissoes.length + 1, profissional_id: '', valor: 0, percentual: 0 },
     ]);
   };
 
   const atualizarComissao = (id, campo, valor) => {
     setComissoes(
-      comissoes.map((comissao) =>
-        comissao.id === id ? { ...comissao, [campo]: valor } : comissao
-      )
+      comissoes.map((comissao) => {
+        if (comissao.id === id) {
+          const updated = { ...comissao, [campo]: valor };
+          // Se mudou o profissional, atualiza o percentual padrão
+          if (campo === 'profissional_id' && valor) {
+            const prof = profissionais.find(p => p.id == valor);
+            if (prof) {
+              updated.percentual = prof.pct_comissao;
+            }
+          }
+          return updated;
+        }
+        return comissao;
+      })
     );
+  };
+
+  const salvarOrcamento = async () => {
+    try {
+      setLoading(true);
+      
+      // Preparar os dados para enviar
+      const payload = {
+        consulta: {
+          paciente_id: pacienteSelecionado,
+          valor: valorTotal,
+          data: new Date().toISOString(),
+          status: 'agendado',
+          tratamento_attributes: tratamentos.map(t => ({
+            nome: t.nome,
+            preco: t.preco,
+            custo: t.custo,
+            quantidade: t.quantidade
+          })),
+          comissoes_attributes: comissoes.map(c => ({
+            profissional_id: c.profissional_id,
+            valor: c.valor,
+            percentual: c.percentual
+          }))
+        }
+      };
+
+      const response = await axios.post('http://localhost:3000/api/v1/consultas', payload);
+      console.log('Orçamento salvo:', response.data);
+      alert('Orçamento salvo com sucesso!');
+      
+      // Limpar o formulário após salvar
+      setPacienteSelecionado('');
+      setTratamentos([{ id: 1, nome: '', preco: 0, custo: 0, quantidade: 1, subtotal: 0 }]);
+      setComissoes([]);
+      
+    } catch (error) {
+      console.error('Erro ao salvar orçamento:', error);
+      alert('Erro ao salvar orçamento: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const valorTotal = tratamentos.reduce((total, t) => total + t.subtotal, 0);
@@ -63,11 +154,25 @@ export function Calc() {
   const margemBruta = valorTotal ? ((valorTotal - custoTotal) / valorTotal) * 100 : 0;
   const margemFinal = valorTotal ? (lucroFinal / valorTotal) * 100 : 0;
 
-  return (
+  if (loading && pacientes.length === 0) {
+    return (
+      <div className="max-w-4xl p-6">
+        <p>Carregando dados...</p>
+      </div>
+    );
+  }
+return (
+    <div className="max-w-4xl p-6">
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+      
     <div className="max-w-4xl p-6">
       <div className="mb-8">
-              <h1 className="text-lg font-medium text-[#A28567] mb-2">Calculadora de Comissões</h1>
-      <p className="text-sm text-gray-400 mb-6">Calcule comissões e analise a viabilidade de orçamentos</p>
+        <h1 className="text-lg font-medium text-[#A28567] mb-2">Calculadora de Comissões</h1>
+        <p className="text-sm text-gray-400 mb-6">Calcule comissões e analise a viabilidade de orçamentos</p>
         <h4 className="text-lg font-medium text-gray-500 mb-2">Paciente</h4>
         <select
           value={pacienteSelecionado}
@@ -169,22 +274,14 @@ export function Calc() {
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Profissional</label>
                   <select
-                    value={comissao.nome}
-                    onChange={(e) => {
-                      const nomeSelecionado = e.target.value;
-                      const profissional = PROFISSIONAIS_DISPONIVEIS.find(p => p.nome === nomeSelecionado);
-                      if (profissional) {
-                        atualizarComissao(comissao.id, 'nome', profissional.nome);
-                        atualizarComissao(comissao.id, 'valor', profissional.valor);
-                        atualizarComissao(comissao.id, 'percentual', profissional.percentual);
-                      }
-                    }}
+                    value={comissao.profissional_id}
+                    onChange={(e) => atualizarComissao(comissao.id, 'profissional_id', e.target.value)}
                     className="w-full p-1.5 text-sm text-gray-600 border border-gray-200 rounded focus:outline-none focus:border-gray-400"
                   >
                     <option value="">Selecione</option>
-                    {PROFISSIONAIS_DISPONIVEIS.map((p) => (
-                      <option key={p.nome} value={p.nome}>
-                        {p.nome}
+                    {profissionais.map((profissional) => (
+                      <option key={profissional.id} value={profissional.id}>
+                        {profissional.nome} ({profissional.pct_comissao}%)
                       </option>
                     ))}
                   </select>
@@ -234,9 +331,15 @@ export function Calc() {
         </div>
       </div>
 
-      <button className="w-full py-2 bg-[#A28567] text-white text-sm font-medium rounded hover:bg-[#8a7358] transition-colors">
-        Salvar Orçamento
+      <button 
+        onClick={salvarOrcamento}
+        disabled={loading}
+        className={`w-full py-2 bg-[#A28567] text-white text-sm font-medium rounded hover:bg-[#8a7358] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        {loading ? 'Salvando...' : 'Salvar Orçamento'}
       </button>
     </div>
+
+  </div>
   );
 }

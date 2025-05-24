@@ -1,41 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaSearch, FaUserMd, FaUserInjured, FaCalendarAlt, FaDollarSign, FaClinicMedical, FaRedo } from 'react-icons/fa';
+import axios from 'axios';
 
 export function GestaoPacientes() {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const pacientes = [
-    {
-      nome: 'Ana Silva',
-      dataConsulta: '09/04/2025',
-      objetivo: 'Emagrecimento',
-      valor: 300.00,
-      atendimento: 'Presencial',
-      retornos: 2,
-      profissional: 'Dr. Carlos Mendes',
-      comissao: 188.00
-    },
-    {
-      nome: 'Pedro Santos',
-      dataConsulta: '11/04/2025',
-      objetivo: 'Ganho muscular',
-      valor: 350.00,
-      atendimento: 'Teleconsulta',
-      retornos: 1,
-      profissional: 'Dra. Juliana Alves',
-      comissao: 87.50
-    },
-    {
-      nome: 'Maria Oliveira',
-      dataConsulta: '04/04/2025',
-      objetivo: 'Reeducação alimentar',
-      valor: 280.00,
-      atendimento: 'Presencial',
-      retornos: 3,
-      profissional: 'Dr. Carlos Mendes',
-      comissao: 150.00
-    }
-  ];
+  const [pacientes, setPacientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPacientes = async () => {
+      try {
+        setLoading(true);
+        // Busca os pacientes da API
+        const response = await axios.get("/api/v1/pacientes", {
+          params: {
+            include: 'consultas' // Para incluir os dados das consultas
+          }
+        });
+
+        // Verifica se a resposta tem dados e se é um array
+        const dadosPacientes = Array.isArray(response.data) ? response.data : 
+                             (response.data.pacientes || response.data.items || []);
+        
+        // Transforma os dados da API no formato esperado pelo componente
+        const pacientesFormatados = dadosPacientes.map(paciente => {
+          // Pega a última consulta do paciente
+          const ultimaConsulta = paciente.consultas?.[0] || {};
+          const profissional = ultimaConsulta.profissional || {};
+          
+          return {
+            nome: paciente.nome || 'N/A',
+            dataConsulta: ultimaConsulta.data 
+              ? new Date(ultimaConsulta.data).toLocaleDateString('pt-BR') 
+              : 'N/A',
+            objetivo: paciente.objetivo || 'N/A',
+            valor: ultimaConsulta.valor || 0,
+            atendimento: ultimaConsulta.modo || 'N/A',
+            retornos: ultimaConsulta.returns_count || 0,
+            profissional: profissional.nome || 'N/A',
+            comissao: calcularComissao(ultimaConsulta.valor, profissional.pct_comissao)
+          };
+        });
+
+        setPacientes(pacientesFormatados);
+      } catch (err) {
+        setError("Erro ao carregar pacientes");
+        console.error("Erro:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPacientes();
+  }, []);
+
+  // Função para calcular a comissão baseada no valor e percentual
+  const calcularComissao = (valor = 0, pctComissao = 0) => {
+    return valor * (pctComissao / 100);
+  };
 
   const filteredPacientes = pacientes.filter(paciente =>
     paciente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,6 +74,24 @@ export function GestaoPacientes() {
     acc[paciente.profissional] += paciente.comissao;
     return acc;
   }, {});
+
+  // ... restante do componente permanece igual ...
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl p-6">
+        <p>Carregando pacientes...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl p-6 bg-red-100 text-red-800 rounded-lg">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl p-6">
@@ -111,49 +152,59 @@ export function GestaoPacientes() {
             </tr>
           </thead>
           <tbody>
-            {filteredPacientes.map((paciente, index) => (
-              <tr key={index} className="border-b border-gray-100">
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.nome}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.dataConsulta}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.objetivo}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  R$ {paciente.valor.toFixed(2)}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.atendimento}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.retornos}
-                </td>
-                <td className="py-2 px-3 text-sm text-gray-600">
-                  {paciente.profissional}
+            {filteredPacientes.length > 0 ? (
+              filteredPacientes.map((paciente, index) => (
+                <tr key={index} className="border-b border-gray-100">
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.nome}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.dataConsulta}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.objetivo}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    R$ {paciente.valor.toFixed(2)}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.atendimento}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.retornos}
+                  </td>
+                  <td className="py-2 px-3 text-sm text-gray-600">
+                    {paciente.profissional}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="py-4 text-center text-sm text-gray-500">
+                  Nenhum paciente encontrado
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Resumo de Comissões */}
-      <div className="border-t border-gray-100 pt-6">
-        <h2 className="text-lg font-medium text-gray-500 mb-3">Resumo de Comissões</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {Object.entries(comissoesPorProfissional).map(([profissional, comissao]) => (
-            <div key={profissional} className="p-3 rounded border border-gray-100">
-              <p className="text-sm text-gray-600"><span className="font-medium">Profissional:</span> {profissional}</p>
-              <p className="text-sm text-gray-600 mt-2"><span className="font-medium">Comissão Total:</span></p>
-              <p className="text-sm text-[#A28567] font-medium">R$ {comissao.toFixed(2)}</p>
-            </div>
-          ))}
+      {Object.keys(comissoesPorProfissional).length > 0 && (
+        <div className="border-t border-gray-100 pt-6">
+          <h2 className="text-lg font-medium text-gray-500 mb-3">Resumo de Comissões</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {Object.entries(comissoesPorProfissional).map(([profissional, comissao]) => (
+              <div key={profissional} className="p-3 rounded border border-gray-100">
+                <p className="text-sm text-gray-600"><span className="font-medium">Profissional:</span> {profissional}</p>
+                <p className="text-sm text-gray-600 mt-2"><span className="font-medium">Comissão Total:</span></p>
+                <p className="text-sm text-[#A28567] font-medium">R$ {comissao.toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

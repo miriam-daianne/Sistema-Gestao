@@ -1,16 +1,21 @@
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: gestao
+  password: password
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  timeout: 5000
-  database: db/development.sqlite3
 
 development:
   <<: *default
+  database: api_gestao_development
 
 test:
   <<: *default
-  database: db/test.sqlite3
+  database: api_gestao_test
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  database: api_gestao_production
+  username: <%= ENV['PG_USERNAME'] %>
+  password: <%= ENV['PG_PASSWORD'] %>

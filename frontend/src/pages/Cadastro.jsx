@@ -3,8 +3,12 @@ import { Menu } from "../components/Menu";
 import { useState } from "react";
 
 export function Cadastro() {
+  const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [email, setEmail] = useState("");
+  const [nascimento, setNascimento] = useState("");
+  const [objetivo, setObjetivo] = useState("");
 
   const formatCpf = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -19,6 +23,45 @@ export function Cadastro() {
     return digits
       .replace(/^(\d{2})(\d)/, "($1) $2")
       .replace(/(\d{5})(\d)/, "$1-$2");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      nome,
+      cpf,
+      telefone,
+      email,
+      nascimento,
+      objetivo,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/api/v1/pacientes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao cadastrar paciente");
+      }
+
+      alert("Paciente cadastrado com sucesso!");
+
+      
+      setNome("");
+      setCpf("");
+      setTelefone("");
+      setEmail("");
+      setNascimento("");
+      setObjetivo("");
+    } catch (error) {
+      alert("Erro: " + error.message);
+    }
   };
 
   return (
@@ -40,11 +83,16 @@ export function Cadastro() {
             Adicione um novo paciente ao sistema
           </p>
 
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="flex flex-col">
               <label className="text-sm text-gray-700">Nome Completo</label>
               <input
                 type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 placeholder="Digite o nome completo"
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
               />
@@ -78,6 +126,8 @@ export function Cadastro() {
               <label className="text-sm text-gray-700">E-mail</label>
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@exemplo.com"
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
               />
@@ -89,6 +139,8 @@ export function Cadastro() {
               </label>
               <input
                 type="date"
+                value={nascimento}
+                onChange={(e) => setNascimento(e.target.value)}
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
               />
             </div>
@@ -99,6 +151,8 @@ export function Cadastro() {
               </label>
               <input
                 type="text"
+                value={objetivo}
+                onChange={(e) => setObjetivo(e.target.value)}
                 className="border border-gray-200 rounded-md px-3 py-2 placeholder-gray-400 focus:outline-none focus:border-[#A28567]"
               />
             </div>
@@ -115,4 +169,3 @@ export function Cadastro() {
     </div>
   );
 }
-

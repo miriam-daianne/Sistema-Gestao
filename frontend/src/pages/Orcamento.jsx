@@ -2,40 +2,69 @@ import { useState, useEffect } from "react";
 import { Nav } from "../components/Nav";
 import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
+import axios from "axios";
 
 export function Orcamento() {
   const [orcamentos, setOrcamentos] = useState([]);
   const [abaAtiva, setAbaAtiva] = useState("lista");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const dadosFicticios = [
-      {
-        id: "BUD-001",
-        paciente: "Maria Souza",
-        data: "12/04/2025",
-        valor: "R$ 990,00",
-        margem: "14.70%",
-        status: "Aprovado",
-      },
-      {
-        id: "BUD-002",
-        paciente: "João Pereira",
-        data: "15/04/2025",
-        valor: "R$ 1.190,00",
-        margem: "16.22%",
-        status: "Pendente",
-      },
-      {
-        id: "BUD-003",
-        paciente: "Ana Oliveira",
-        data: "18/04/2025",
-        valor: "R$ 430,00",
-        margem: "-31.51%",
-        status: "Rejeitado",
-      },
-    ];
-    setOrcamentos(dadosFicticios);
+    const fetchOrcamentos = async () => {
+      try {
+        setLoading(true);
+        // Busca os orçamentos da API
+        const response = await axios.get("/api/v1/consultas", {
+          params: {
+            status: 'orcamento' // Ou outro parâmetro para filtrar orçamentos
+          }
+        });
+        
+        // Verifica se a resposta tem dados e se consultas existe
+        if (response.data && Array.isArray(response.data.consultas)) {
+          // Transforma os dados da API no formato esperado pelo componente
+          const orcamentosFormatados = response.data.consultas.map(consulta => ({
+            id: `BUD-${consulta.id?.toString().padStart(3, '0') || '000'}`,
+            paciente: consulta.paciente?.nome || 'N/A',
+            data: consulta.data ? new Date(consulta.data).toLocaleDateString('pt-BR') : 'N/A',
+            valor: `R$ ${consulta.valor?.toFixed(2).replace('.', ',') || '0,00'}`,
+            margem: calcularMargem(consulta.valor || 0, consulta.tratamento?.custo || 0),
+            status: traduzirStatus(consulta.status)
+          }));
+          
+          setOrcamentos(orcamentosFormatados);
+        } else {
+          setOrcamentos([]); // Define array vazio se não houver dados
+        }
+      } catch (err) {
+        setError("Erro ao carregar orçamentos");
+        console.error("Erro:", err);
+        setOrcamentos([]); // Define array vazio em caso de erro
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchOrcamentos();
   }, []);
+
+  // Função para calcular a margem (exemplo)
+  const calcularMargem = (valor, custo) => {
+    if (custo === 0) return "0%";
+    const margem = ((valor - custo) / custo) * 100;
+    return `${margem.toFixed(2)}%`.replace('.', ',');
+  };
+
+  // Função para traduzir os status da API
+  const traduzirStatus = (status) => {
+    switch(status) {
+      case 'agendado': return 'Pendente';
+      case 'concluido': return 'Aprovado';
+      case 'cancelado': return 'Rejeitado';
+      default: return 'Pendente';
+    }
+  };
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -49,6 +78,32 @@ export function Orcamento() {
         return "";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <Nav />
+        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+          <div className="max-w-4xl p-6">
+            <p>Carregando orçamentos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex">
+        <Nav />
+        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+          <div className="max-w-4xl p-6 bg-red-100 text-red-800 rounded-lg">
+            <p>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
