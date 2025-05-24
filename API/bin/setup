@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+puts "Setting up the application..."
+
+# Install gems
+system("bundle install")
+
+# Setup the database
+system("bin/rails db:setup")
+
+puts "Setup complete."

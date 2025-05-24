@@ -9,7 +9,7 @@ class Consulta < ApplicationRecord
   validates :returns_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   
   # Adicionar campo status para refletir o status de tratamentos (concluído/agendado)
-   rails generate migration AddStatusToConsultas status:string
+  # rails generate migration AddStatusToConsultas status:string
   
   scope :recentes, -> { order(data: :desc) }
   scope :do_mes_atual, -> { where(data: Time.current.beginning_of_month..Time.current.end_of_month) }
