@@ -7,7 +7,7 @@ Este projeto é uma API backend desenvolvida em Ruby on Rails para gerenciar cli
 ### Pré-requisitos
 
 - Ruby 3.x
-- Rails 7.x
+- Rails 8.x
 - SQLite3 (ou outro banco configurado)
 - Bundler
 
