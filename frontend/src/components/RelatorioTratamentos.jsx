@@ -41,15 +41,16 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
         });
         
         // Transforma os dados da API no formato esperado
-        const tratamentosFormatados = response.data.consultas.map(consulta => ({
-          id: consulta.id,
-          data: new Date(consulta.data).toLocaleDateString('pt-BR'),
-          paciente: consulta.paciente?.nome || 'N/A',
-          tratamento: consulta.tratamento?.nome || 'N/A',
-          valor: consulta.valor,
-          profissional: consulta.profissional?.nome || 'N/A',
-          status: traduzirStatus(consulta.status)
-        }));
+        const tratamentosFormatados = (response.data?.consultas || []).map(consulta => ({
+        id: consulta.id,
+        data: new Date(consulta.data).toLocaleDateString('pt-BR'),
+        paciente: consulta.paciente?.nome || 'N/A',
+        tratamento: consulta.tratamento?.nome || 'N/A',
+        valor: consulta.valor,
+        profissional: consulta.profissional?.nome || 'N/A',
+        status: traduzirStatus(consulta.status)
+      }));
+
         
         setTratamentos(tratamentosFormatados);
       } catch (err) {

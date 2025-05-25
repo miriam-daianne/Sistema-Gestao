@@ -2,21 +2,28 @@ module Api
   module V1
     class PacientesController < ApplicationController
       def index
-        # Garante que temos os relacionamentos carregados
-        pacientes = Paciente.left_joins(consultas: :profissional)
-                          .select(
-                            'pacientes.id',
-                            'pacientes.nome',
-                            'MAX(consultas.data) AS ultima_consulta',
-                            'COALESCE(SUM(consultas.valor), 0) AS vl_total',
-                            'pacientes.objetivo',
-                            'consultas.modo',
-                            'consultas.returns_count AS retornos',
-                            'profissionais.nome AS profissional_nome'
-                          )
-                          .group('pacientes.id', 'pacientes.nome', 'pacientes.objetivo', 'consultas.modo', 'consultas.returns_count', 'profissionais.nome')
+        begin
+          # Garante que temos os relacionamentos carregados
+          query = Paciente.joins(consultas: :profissional)
+                            .select(
+                              'pacientes.id',
+                              'pacientes.nome',
+                              'MAX(consultas.data) AS ultima_consulta',
+                              'COALESCE(SUM(consultas.valor), 0) AS vl_total',
+                              'consultas.modo',
+                              'consultas.returns_count AS retornos',
+                              'profissionais.nome AS profissional_nome'
+                            )
+                            .group('pacientes.id', 'pacientes.nome', 'consultas.modo', 'consultas.returns_count', 'profissionais.nome')
 
-        render json: pacientes
+          Rails.logger.debug "Generated SQL: #{query.to_sql}"
+
+          pacientes = query
+
+          render json: pacientes
+        rescue => e
+          render json: { error: e.message }, status: :internal_server_error
+        end
       end
       
       def create
