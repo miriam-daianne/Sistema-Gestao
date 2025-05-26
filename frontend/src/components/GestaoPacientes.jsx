@@ -13,35 +13,30 @@ export function GestaoPacientes() {
       try {
         setLoading(true);
         // Busca os pacientes da API
-        const response = await axios.get("/api/v1/pacientes", {
-          params: {
-            include: 'consultas' // Para incluir os dados das consultas
-          }
-        });
+        const response = await axios.get("http://localhost:3000/api/v1/pacientes");
 
         // Verifica se a resposta tem dados e se é um array
+        console.log("Raw API response data:", response.data);
         const dadosPacientes = Array.isArray(response.data) ? response.data : 
                              (response.data.pacientes || response.data.items || []);
         
         // Transforma os dados da API no formato esperado pelo componente
         const pacientesFormatados = dadosPacientes.map(paciente => {
-          // Pega a última consulta do paciente
-          const ultimaConsulta = paciente.consultas?.[0] || {};
-          const profissional = ultimaConsulta.profissional || {};
-          
+          // Ajusta para o formato do backend que retorna dados agregados
           return {
             nome: paciente.nome || 'N/A',
-            dataConsulta: ultimaConsulta.data 
-              ? new Date(ultimaConsulta.data).toLocaleDateString('pt-BR') 
+            dataConsulta: paciente.ultima_consulta
+              ? new Date(paciente.ultima_consulta).toLocaleDateString('pt-BR')
               : 'N/A',
             objetivo: paciente.objetivo || 'N/A',
-            valor: ultimaConsulta.valor || 0,
-            atendimento: ultimaConsulta.modo || 'N/A',
-            retornos: ultimaConsulta.returns_count || 0,
-            profissional: profissional.nome || 'N/A',
-            comissao: calcularComissao(ultimaConsulta.valor, profissional.pct_comissao)
+            valor: paciente.vl_total || 0,
+            atendimento: paciente.modo || 'N/A',
+            retornos: paciente.retornos || 0,
+            profissional: paciente.profissional_nome || 'N/A',
+            comissao: calcularComissao(paciente.vl_total, 0) // pct_comissao not available in this query
           };
         });
+        console.log("Formatted pacientes data:", pacientesFormatados);
 
         setPacientes(pacientesFormatados);
       } catch (err) {
@@ -165,7 +160,7 @@ export function GestaoPacientes() {
                     {paciente.objetivo}
                   </td>
                   <td className="py-2 px-3 text-sm text-gray-600">
-                    R$ {paciente.valor.toFixed(2)}
+                  R$ {(typeof paciente.valor === 'number' ? paciente.valor : parseFloat(paciente.valor) || 0).toFixed(2)}
                   </td>
                   <td className="py-2 px-3 text-sm text-gray-600">
                     {paciente.atendimento}

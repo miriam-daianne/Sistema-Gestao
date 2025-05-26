@@ -4,90 +4,90 @@ import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
 import axios from "axios";
 
+function calcularMargem(valor, custo) {
+  if (custo === 0) return "0%";
+  const margem = ((valor - custo) / custo) * 100;
+  return `${margem.toFixed(2).replace('.', ',')}%`;
+}
+
+function traduzirStatus(status) {
+  switch (status) {
+    case "agendado":
+      return "Pendente";
+    case "concluido":
+      return "Aprovado";
+    case "cancelado":
+      return "Rejeitado";
+    default:
+      return "Pendente";
+  }
+}
+
+function getStatusStyle(status) {
+  switch (status) {
+    case "Aprovado":
+      return "bg-green-500 text-white px-3 py-1 rounded-full text-xs";
+    case "Pendente":
+      return "bg-yellow-400 text-white px-3 py-1 rounded-full text-xs";
+    case "Rejeitado":
+      return "bg-red-500 text-white px-3 py-1 rounded-full text-xs";
+    default:
+      return "";
+  }
+}
+
 export function Orcamento() {
   const [orcamentos, setOrcamentos] = useState([]);
   const [abaAtiva, setAbaAtiva] = useState("lista");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [rawResponse, setRawResponse] = useState(null);
 
   useEffect(() => {
-    const fetchOrcamentos = async () => {
+    async function fetchOrcamentos() {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        // Busca os orçamentos da API
-        const response = await axios.get("/api/v1/consultas", {
-          params: {
-            status: 'orcamento' // Ou outro parâmetro para filtrar orçamentos
-          }
+        const { data } = await axios.get("/api/v1/consultas", {
+          params: { status: "orcamento" },
         });
-        
-        // Verifica se a resposta tem dados e se consultas existe
-        if (response.data && Array.isArray(response.data.consultas)) {
-          // Transforma os dados da API no formato esperado pelo componente
-          const orcamentosFormatados = response.data.consultas.map(consulta => ({
-            id: `BUD-${consulta.id?.toString().padStart(3, '0') || '000'}`,
-            paciente: consulta.paciente?.nome || 'N/A',
-            data: consulta.data ? new Date(consulta.data).toLocaleDateString('pt-BR') : 'N/A',
-            valor: `R$ ${consulta.valor?.toFixed(2).replace('.', ',') || '0,00'}`,
+        setRawResponse(data);
+
+        if (data?.consultas && Array.isArray(data.consultas)) {
+          const orcamentosFormatados = data.consultas.map((consulta) => ({
+            id: `BUD-${consulta.id?.toString().padStart(3, "0") || "000"}`,
+            paciente: consulta.paciente || "N/A",
+            data: consulta.data
+              ? new Date(consulta.data).toLocaleDateString("pt-BR")
+              : "N/A",
+            valor: `R$ ${consulta.valor?.toFixed(2).replace(".", ",") || "0,00"}`,
             margem: calcularMargem(consulta.valor || 0, consulta.tratamento?.custo || 0),
-            status: traduzirStatus(consulta.status)
+            status: traduzirStatus(consulta.status),
           }));
-          
           setOrcamentos(orcamentosFormatados);
         } else {
-          setOrcamentos([]); // Define array vazio se não houver dados
+          setOrcamentos([]);
         }
       } catch (err) {
         setError("Erro ao carregar orçamentos");
-        console.error("Erro:", err);
-        setOrcamentos([]); // Define array vazio em caso de erro
+        setOrcamentos([]);
+        console.error(err);
       } finally {
         setLoading(false);
       }
-    };
-    
+    }
     fetchOrcamentos();
   }, []);
-
-  // Função para calcular a margem (exemplo)
-  const calcularMargem = (valor, custo) => {
-    if (custo === 0) return "0%";
-    const margem = ((valor - custo) / custo) * 100;
-    return `${margem.toFixed(2)}%`.replace('.', ',');
-  };
-
-  // Função para traduzir os status da API
-  const traduzirStatus = (status) => {
-    switch(status) {
-      case 'agendado': return 'Pendente';
-      case 'concluido': return 'Aprovado';
-      case 'cancelado': return 'Rejeitado';
-      default: return 'Pendente';
-    }
-  };
-
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "Aprovado":
-        return "bg-green-500 text-white px-3 py-1 rounded-full text-xs";
-      case "Pendente":
-        return "bg-yellow-400 text-white px-3 py-1 rounded-full text-xs";
-      case "Rejeitado":
-        return "bg-red-500 text-white px-3 py-1 rounded-full text-xs";
-      default:
-        return "";
-    }
-  };
 
   if (loading) {
     return (
       <div className="flex">
         <Nav />
-        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+        <main className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
           <div className="max-w-4xl p-6">
             <p>Carregando orçamentos...</p>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -96,11 +96,11 @@ export function Orcamento() {
     return (
       <div className="flex">
         <Nav />
-        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+        <main className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
           <div className="max-w-4xl p-6 bg-red-100 text-red-800 rounded-lg">
             <p>{error}</p>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export function Orcamento() {
   return (
     <div className="flex">
       <Nav />
-      <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+      <main className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
         <h2 className="text-[#A28567] font-semibold text-xl mb-4">
           Sistema de Cálculo de Comissão e Análise de Orçamentos
         </h2>
@@ -116,7 +116,7 @@ export function Orcamento() {
 
         <Container>
           <div className="max-w-4xl p-6">
-            <div className="mb-8">
+            <section className="mb-8">
               <h1 className="text-lg font-medium text-[#A28567] mb-2">
                 Análise de Orçamentos
               </h1>
@@ -124,7 +124,6 @@ export function Orcamento() {
                 Gerencie e acompanhe todos os orçamentos da clínica
               </p>
 
-              {/* Abas */}
               <div className="flex gap-2 mb-6">
                 <button
                   className={`px-4 py-2 rounded-md text-sm ${
@@ -148,13 +147,12 @@ export function Orcamento() {
                 </button>
               </div>
 
-              {/* Conteúdo da aba selecionada */}
               {abaAtiva === "lista" && (
                 <div className="border-t border-gray-100 pt-6 w-max">
                   <div className="overflow-x-auto">
                     <table className="min-w-full bg-white border border-gray-200 rounded-lg flex flex-col gap-4">
                       <thead>
-                        <tr className="border-b border-gray-200  flex justify-between gap-10 ml-2">
+                        <tr className="border-b border-gray-200 flex justify-between gap-10 ml-2">
                           <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
                             ID
                           </th>
@@ -178,26 +176,15 @@ export function Orcamento() {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="flex flex-col gap-6">
+                      <tbody>
                         {orcamentos.map((item, index) => (
-                          <tr
-                            key={index}
-                            className="border-b border-gray-100 flex justify-between "
-                          >
-                            <td className="py-2 px-3 text-sm text-gray-600">
-                              {item.id}
-                            </td>
-                            <td className="py-2 px-3 text-sm text-gray-600">
-                              {item.paciente}
-                            </td>
-                            <td className="py-2 px-3 text-sm text-gray-600 ">
-                              {item.data}
-                            </td>
-                            <td className="py-2 px-3 text-sm text-gray-600 ">
-                              {item.valor}
-                            </td>
+                          <tr key={index} className="border-b border-gray-100">
+                            <td className="py-2 px-3 text-sm text-gray-600">{item.id}</td>
+                            <td className="py-2 px-3 text-sm text-gray-600">{item.paciente}</td>
+                            <td className="py-2 px-3 text-sm text-gray-600">{item.data}</td>
+                            <td className="py-2 px-3 text-sm text-gray-600">{item.valor}</td>
                             <td
-                              className={`py-2 px-3 text-sm  ${
+                              className={`py-2 px-3 text-sm ${
                                 item.margem.startsWith("-")
                                   ? "text-red-500"
                                   : "text-green-500"
@@ -206,9 +193,7 @@ export function Orcamento() {
                               {item.margem}
                             </td>
                             <td className="py-2 px-3">
-                              <span className={getStatusStyle(item.status)}>
-                                {item.status}
-                              </span>
+                              <span className={getStatusStyle(item.status)}>{item.status}</span>
                             </td>
                             <td className="py-2 px-3">
                               <button className="text-sm text-[#A28567] hover:underline">
@@ -232,10 +217,11 @@ export function Orcamento() {
                   </div>
                 </div>
               )}
-            </div>
+
+            </section>
           </div>
         </Container>
-      </div>
+      </main>
     </div>
   );
 }

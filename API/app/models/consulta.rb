@@ -15,7 +15,7 @@ class Consulta < ApplicationRecord
   }
   
   # Adicione após confirmar que a coluna existe
-  validates :status, inclusion: { in: ['agendado', 'concluido', 'cancelado'] }, allow_nil: true
+  validates :status, inclusion: { in: ['agendado', 'concluido', 'cancelado', 'orcamento'] }, allow_nil: true
 
   # Scopes otimizados
   scope :recentes, -> { order(data: :desc) }

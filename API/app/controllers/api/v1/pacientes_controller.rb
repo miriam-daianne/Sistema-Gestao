@@ -4,7 +4,7 @@ module Api
       def index
         begin
           # Garante que temos os relacionamentos carregados
-          query = Paciente.joins(consultas: :profissional)
+          query = Paciente.left_joins(consultas: :profissional)
                             .select(
                               'pacientes.id',
                               'pacientes.nome',
@@ -20,7 +20,8 @@ module Api
 
           pacientes = query
 
-          render json: pacientes
+          # Convert ActiveRecord::Relation to array of hashes for proper JSON serialization
+          render json: pacientes.as_json
         rescue => e
           render json: { error: e.message }, status: :internal_server_error
         end
@@ -39,7 +40,7 @@ module Api
       private
       
       def paciente_params
-        params.require(:paciente).permit(:nome, :cpf, :telefone, :email, :nascimento, :objetivo)
+        params.require(:paciente).permit(:nome, :cpf, :telefone, :email, :nascimento, :objetivo, :cliente_id)
       end
     end
   end
