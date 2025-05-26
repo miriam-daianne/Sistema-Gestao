@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Nav } from "../components/Nav";
+//import { Nav } from "../components/Nav";
 import { Menu } from "../components/Menu";
 import { CardRelatorio } from "../components/CardRelatorio";
 import { formatarMoeda } from "../utils/formatadores";
@@ -33,8 +33,8 @@ export function Dashboard() {
         });
         
         setLucro({
-          valor: Number(receitaTotal) - Number(comissoes) - Number(custos),
-          percentual: (Number(receitaTotal) - Number(comissoes) - Number(custos)) > 0 ? 5 : 0
+          valor: Number(receitaTotal) - (Number(receitaTotal) * 0.025) - Number(custos),
+          percentual: (Number(receitaTotal) - (Number(receitaTotal) * 0.025) - Number(custos)) > 0 ? 5 : 0
         });
         
         // Busca as consultas recentes para atividades
@@ -65,9 +65,9 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex">
-        <Nav />
-        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+    <div className="flex">
+
+      <div className="main p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
           <p>Carregando dashboard...</p>
         </div>
       </div>
@@ -77,8 +77,8 @@ export function Dashboard() {
   if (error) {
     return (
       <div className="flex">
-        <Nav />
-        <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
+      
+        <div className="main p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
           <div className="bg-red-100 text-red-800 p-4 rounded-lg">
             <p>{error}</p>
           </div>
@@ -89,14 +89,12 @@ export function Dashboard() {
 
   return (
     <div className="flex">
-      <Nav />
-      <div className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
-        <h2 className="text-[#A28567] font-semibold text-xl mb-4">
-          Sistema de Cálculo de Comissão e Análise de Orçamentos
-        </h2>
+   
+      <div className="main   bg-[#FBFAF9] min-h-screen w-full flex flex-col ">
+       
         <Menu />
 
-        <div>
+        <div className="ml-10"> 
           <h3 className="text-lg font-medium text-[#A28567] mb-2 mt-5.5">Dashboard Financeiro</h3>
           <p className="text-sm text-gray-400 mb-6">Visão geral das métricas financeiras da clínica</p>
 

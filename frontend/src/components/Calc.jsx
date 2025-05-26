@@ -136,14 +136,14 @@ export function Calc() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col items-center">
       {error && (
         <div className="bg-red-100 text-red-800 p-4 rounded-lg">
           {error}
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm w-5/6">
         <h3 className="text-sm text-gray-500 mb-1">Paciente</h3>
         <p className="text-xs text-gray-400 mb-2">Selecione o paciente para o orçamento</p>
         <select
@@ -160,7 +160,7 @@ export function Calc() {
         </select>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm w-5/6">
         <h3 className="text-sm text-gray-500 mb-1">Procedimentos e Tratamentos</h3>
         <p className="text-xs text-gray-400 mb-4">Adicione os tratamentos ao orçamento</p>
 
@@ -242,7 +242,7 @@ export function Calc() {
         </button>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm w-5/6">
         <h3 className="text-sm text-gray-500 mb-1">Comissões de Profissionais</h3>
         <p className="text-xs text-gray-400 mb-4">Adicione as comissões dos profissionais</p>
 
@@ -302,7 +302,7 @@ export function Calc() {
         )}
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm w-5/6">
         <h3 className="text-sm text-gray-500 mb-1">Resumo Financeiro</h3>
         <p className="text-xs text-gray-400 mb-4">Resultado final do orçamento</p>
 
@@ -327,7 +327,7 @@ export function Calc() {
       <button 
         onClick={salvarOrcamento}
         disabled={loading}
-        className={`w-full py-3 bg-[#A28567] text-white text-sm font-medium rounded hover:bg-[#8a7358] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`w-2xs py-3 bg-[#A28567] mb-10 text-white text-sm font-medium rounded hover:bg-[#8a7358] transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         {loading ? 'Salvando...' : 'Salvar Orçamento'}
       </button>
