@@ -94,11 +94,11 @@ export function Dashboard() {
        
         <Menu />
 
-        <div className="ml-10"> 
+        <div className="ml-10 w-9/10  "> 
           <h3 className="text-lg font-medium text-[#A28567] mb-2 mt-5.5">Dashboard Financeiro</h3>
           <p className="text-sm text-gray-400 mb-6">Visão geral das métricas financeiras da clínica</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 ">
             {/* Card de Receita */}
             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
               <h3 className="text-sm text-gray-500 mb-1">Receita Total</h3>
