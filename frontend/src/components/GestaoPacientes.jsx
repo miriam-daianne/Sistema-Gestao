@@ -199,7 +199,7 @@ export function GestaoPacientes() {
               <div key={profissional} className="p-3 rounded border border-gray-100">
                 <p className="text-sm text-gray-600"><span className="font-medium">Profissional:</span> {profissional}</p>
                 <p className="text-sm text-gray-600 mt-2"><span className="font-medium">Comissão Total:</span></p>
-                <p className="text-sm text-[#A28567] font-medium">R$ {comissao.toFixed(2)}</p>
+                <p className="text-sm text-[#A28567] font-medium">R$ {(typeof comissao === 'number' ? comissao : parseFloat(comissao) || 0).toFixed(2)}</p>
               </div>
             ))}
           </div>

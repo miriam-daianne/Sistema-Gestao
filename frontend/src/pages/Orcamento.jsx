@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Nav } from "../components/Nav";
 import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
-import axios from "axios";
+import api from "../api";
 import { FaIdBadge, FaUser, FaCalendarAlt, FaMoneyBillWave, FaPercentage, FaClipboardList, FaEllipsisH } from 'react-icons/fa';
 
 function calcularMargem(valor, custo) {
@@ -51,7 +51,7 @@ export function Orcamento() {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get("/api/v1/consultas", {
+        const { data } = await api.get("/consultas", {
           params: { status: "orcamento" },
         });
 

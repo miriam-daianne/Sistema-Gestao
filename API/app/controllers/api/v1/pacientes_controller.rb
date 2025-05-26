@@ -40,7 +40,7 @@ module Api
       private
       
       def paciente_params
-        params.require(:paciente).permit(:nome, :cpf, :telefone, :email, :nascimento, :objetivo, :cliente_id)
+        params.require(:paciente).permit(:nome, :objetivo, :modo, :cliente_id)
       end
     end
   end

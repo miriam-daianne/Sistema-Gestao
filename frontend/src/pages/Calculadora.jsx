@@ -13,10 +13,8 @@ export function Calculadora(){
               Sistema de Cálculo de Comissão e Análise de Orçamentos
             </h2>
             <Menu />
-            <Container 
-                titulo="Calculadora de Comissões" 
-                subtitulo="Calcule comissões e analise a viabilidade de orçamentos"
-            >
+            <Container>  <h3 className="text-lg font-medium text-[#A28567] mb-2 mt-5.5">Calculadora de Comissões</h3>
+          <p className="text-sm text-gray-400 mb-6">Calcule comissões e analise a viabilidade de orçamentos</p>
               <Calc /> 
             </Container>
           </div>
