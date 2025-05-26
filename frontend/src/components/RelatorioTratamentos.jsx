@@ -17,14 +17,16 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
         const now = new Date();
         
         if (periodo === 'ultima-semana') {
-          startDate = new Date(now.setDate(now.getDate() - 7));
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
           endDate = new Date();
         } else if (periodo === 'ultimo-mes') {
           startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
           endDate = new Date(now.getFullYear(), now.getMonth(), 0);
         } else {
           // Personalizado - você pode adicionar lógica para datas específicas
-          startDate = new Date(now.setDate(now.getDate() - 30)); // 30 dias como padrão
+          startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30); // 30 dias como padrão
           endDate = new Date();
         }
 
@@ -33,7 +35,7 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
         const endDateISO = endDate.toISOString().split('T')[0];
 
         // Busca os tratamentos da API
-        const response = await axios.get("/api/v1/consultas", {
+        const response = await axios.get("http://localhost:3000/api/v1/consultas", {
           params: {
             start_date: startDateISO,
             end_date: endDateISO
@@ -42,14 +44,14 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
         
         // Transforma os dados da API no formato esperado
         const tratamentosFormatados = (response.data?.consultas || []).map(consulta => ({
-        id: consulta.id,
-        data: new Date(consulta.data).toLocaleDateString('pt-BR'),
-        paciente: consulta.paciente?.nome || 'N/A',
-        tratamento: consulta.tratamento?.nome || 'N/A',
-        valor: consulta.valor,
-        profissional: consulta.profissional?.nome || 'N/A',
-        status: traduzirStatus(consulta.status)
-      }));
+          id: consulta.id,
+          data: consulta.data ? new Date(consulta.data).toLocaleDateString('pt-BR') : 'N/A',
+          paciente: consulta.paciente?.nome || 'N/A',
+          tratamento: consulta.tratamento?.nome || 'N/A',
+          valor: consulta.valor || 0,
+          profissional: consulta.profissional?.nome || 'N/A',
+          status: traduzirStatus(consulta.status)
+        }));
 
         
         setTratamentos(tratamentosFormatados);
@@ -84,6 +86,10 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
   if (loading) return <div className="flex justify-center py-8">Carregando...</div>;
   if (error) return <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>;
 
+  const valorMedio = tratamentos.length > 0 
+    ? tratamentos.reduce((acc, t) => acc + (typeof t.valor === 'number' ? t.valor : parseFloat(t.valor) || 0), 0) / tratamentos.length 
+    : 0;
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
@@ -109,17 +115,12 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
           >
             Último Mês
           </button>
-          <button 
-            onClick={() => setPeriodo('personalizado')}
-            className={`px-3 py-1 text-xs rounded hover:opacity-90 ${
-              periodo === 'personalizado' 
-                ? 'bg-[#A28567] text-white' 
-                : 'border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            Personalizado
-          </button>
+          {/* Removed the Personalizado button as requested */}
         </div>
+      </div>
+
+      <div className="mb-4 text-sm text-gray-700">
+        Valor médio: {formatarMoeda(valorMedio)}
       </div>
 
       <div className="overflow-x-auto">
@@ -155,7 +156,7 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
 
       <div className="flex justify-center items-center mt-6 space-x-2">
         <button className="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50">
-          &lt; Previous
+          {"< Previous"}
         </button>
         <button className="px-3 py-1 bg-[#A28567] text-white rounded text-sm hover:opacity-90">
           1
@@ -167,7 +168,7 @@ export function RelatorioTratamentos({ periodo, setPeriodo }) {
           3
         </button>
         <button className="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50">
-          Next &gt;
+          {"Next >"}
         </button>
       </div>
     </div>

@@ -3,9 +3,10 @@ import { Nav } from "../components/Nav";
 import { Container } from "../components/Container";
 import { Menu } from "../components/Menu";
 import axios from "axios";
+import { FaIdBadge, FaUser, FaCalendarAlt, FaMoneyBillWave, FaPercentage, FaClipboardList, FaEllipsisH } from 'react-icons/fa';
 
 function calcularMargem(valor, custo) {
-  if (custo === 0) return "0%";
+  if (!custo || custo === 0) return "0%";
   const margem = ((valor - custo) / custo) * 100;
   return `${margem.toFixed(2).replace('.', ',')}%`;
 }
@@ -18,6 +19,8 @@ function traduzirStatus(status) {
       return "Aprovado";
     case "cancelado":
       return "Rejeitado";
+    case "orcamento":
+      return "Orçamento";
     default:
       return "Pendente";
   }
@@ -31,6 +34,8 @@ function getStatusStyle(status) {
       return "bg-yellow-400 text-white px-3 py-1 rounded-full text-xs";
     case "Rejeitado":
       return "bg-red-500 text-white px-3 py-1 rounded-full text-xs";
+    case "Orçamento":
+      return "bg-blue-500 text-white px-3 py-1 rounded-full text-xs";
     default:
       return "";
   }
@@ -38,10 +43,8 @@ function getStatusStyle(status) {
 
 export function Orcamento() {
   const [orcamentos, setOrcamentos] = useState([]);
-  const [abaAtiva, setAbaAtiva] = useState("lista");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [rawResponse, setRawResponse] = useState(null);
 
   useEffect(() => {
     async function fetchOrcamentos() {
@@ -51,19 +54,22 @@ export function Orcamento() {
         const { data } = await axios.get("/api/v1/consultas", {
           params: { status: "orcamento" },
         });
-        setRawResponse(data);
 
         if (data?.consultas && Array.isArray(data.consultas)) {
-          const orcamentosFormatados = data.consultas.map((consulta) => ({
-            id: `BUD-${consulta.id?.toString().padStart(3, "0") || "000"}`,
-            paciente: consulta.paciente || "N/A",
-            data: consulta.data
-              ? new Date(consulta.data).toLocaleDateString("pt-BR")
-              : "N/A",
-            valor: `R$ ${consulta.valor?.toFixed(2).replace(".", ",") || "0,00"}`,
-            margem: calcularMargem(consulta.valor || 0, consulta.tratamento?.custo || 0),
-            status: traduzirStatus(consulta.status),
-          }));
+          const orcamentosFormatados = data.consultas.map((consulta) => {
+            const valorNum = Number(consulta.valor) || 0;
+            // custo is not provided in API, so margin calculation will be 0%
+            return {
+              id: `BUD-${consulta.id?.toString().padStart(3, "0") || "000"}`,
+              paciente: consulta.paciente || "N/A",
+              data: consulta.data
+                ? new Date(consulta.data).toLocaleDateString("pt-BR")
+                : "N/A",
+              valor: `R$ ${valorNum.toFixed(2).replace(".", ",")}`,
+              margem: calcularMargem(valorNum, null),
+              status: traduzirStatus(consulta.status),
+            };
+          });
           setOrcamentos(orcamentosFormatados);
         } else {
           setOrcamentos([]);
@@ -78,32 +84,6 @@ export function Orcamento() {
     }
     fetchOrcamentos();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex">
-        <Nav />
-        <main className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
-          <div className="max-w-4xl p-6">
-            <p>Carregando orçamentos...</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex">
-        <Nav />
-        <main className="main ml-64 p-6 bg-[#FBFAF9] min-h-screen w-full flex flex-col">
-          <div className="max-w-4xl p-6 bg-red-100 text-red-800 rounded-lg">
-            <p>{error}</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="flex">
@@ -124,60 +104,67 @@ export function Orcamento() {
                 Gerencie e acompanhe todos os orçamentos da clínica
               </p>
 
-              <div className="flex gap-2 mb-6">
-                <button
-                  className={`px-4 py-2 rounded-md text-sm ${
-                    abaAtiva === "lista"
-                      ? "bg-white shadow text-[#3B3024] font-medium border border-gray-200"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                  onClick={() => setAbaAtiva("lista")}
-                >
-                  Lista de Orçamentos
-                </button>
-                <button
-                  className={`px-4 py-2 rounded-md text-sm ${
-                    abaAtiva === "grafico"
-                      ? "bg-white shadow text-[#3B3024] font-medium border border-gray-200"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                  onClick={() => setAbaAtiva("grafico")}
-                >
-                  Análise Gráfica
-                </button>
-              </div>
+              {loading && (
+                <p>Carregando orçamentos...</p>
+              )}
 
-              {abaAtiva === "lista" && (
-                <div className="border-t border-gray-100 pt-6 w-max">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border border-gray-200 rounded-lg flex flex-col gap-4">
-                      <thead>
-                        <tr className="border-b border-gray-200 flex justify-between gap-10 ml-2">
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            ID
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Paciente
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Data
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Valor Total
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Margem Final
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Status
-                          </th>
-                          <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
-                            Ações
-                          </th>
+              {error && (
+                <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-4">
+                  {error}
+                </div>
+              )}
+
+              {!loading && !error && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaIdBadge className="mr-2" /> ID
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaUser className="mr-2" /> Paciente
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaCalendarAlt className="mr-2" /> Data
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaMoneyBillWave className="mr-2" /> Valor Total
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaPercentage className="mr-2" /> Margem Final
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaClipboardList className="mr-2" /> Status
+                          </div>
+                        </th>
+                        <th className="py-2 px-3 text-left text-sm font-normal text-gray-500">
+                          <div className="flex items-center">
+                            <FaEllipsisH className="mr-2" /> Ações
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orcamentos.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" className="py-4 text-center text-gray-500">
+                            Nenhum orçamento encontrado.
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {orcamentos.map((item, index) => (
+                      ) : (
+                        orcamentos.map((item, index) => (
                           <tr key={index} className="border-b border-gray-100">
                             <td className="py-2 px-3 text-sm text-gray-600">{item.id}</td>
                             <td className="py-2 px-3 text-sm text-gray-600">{item.paciente}</td>
@@ -201,20 +188,10 @@ export function Orcamento() {
                               </button>
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {abaAtiva === "grafico" && (
-                <div className="border-t border-gray-100 pt-6">
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center h-64">
-                    <p className="text-sm text-gray-400">
-                      O conteúdo gráfico será implementado futuramente.
-                    </p>
-                  </div>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
 

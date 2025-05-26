@@ -7,6 +7,7 @@ export function GestaoPacientes() {
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [comissoes, setComissoes] = useState({});
 
   useEffect(() => {
     const fetchPacientes = async () => {
@@ -16,13 +17,11 @@ export function GestaoPacientes() {
         const response = await axios.get("http://localhost:3000/api/v1/pacientes");
 
         // Verifica se a resposta tem dados e se é um array
-        console.log("Raw API response data:", response.data);
         const dadosPacientes = Array.isArray(response.data) ? response.data : 
                              (response.data.pacientes || response.data.items || []);
         
         // Transforma os dados da API no formato esperado pelo componente
         const pacientesFormatados = dadosPacientes.map(paciente => {
-          // Ajusta para o formato do backend que retorna dados agregados
           return {
             nome: paciente.nome || 'N/A',
             dataConsulta: paciente.ultima_consulta
@@ -32,11 +31,9 @@ export function GestaoPacientes() {
             valor: paciente.vl_total || 0,
             atendimento: paciente.modo || 'N/A',
             retornos: paciente.retornos || 0,
-            profissional: paciente.profissional_nome || 'N/A',
-            comissao: calcularComissao(paciente.vl_total, 0) // pct_comissao not available in this query
+            profissional: paciente.profissional_nome || 'N/A'
           };
         });
-        console.log("Formatted pacientes data:", pacientesFormatados);
 
         setPacientes(pacientesFormatados);
       } catch (err) {
@@ -47,13 +44,23 @@ export function GestaoPacientes() {
       }
     };
 
-    fetchPacientes();
-  }, []);
+    const fetchComissoes = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/v1/comissoes");
+        // Map commissions by professional name for quick lookup
+        const comissoesMap = {};
+        response.data.forEach(item => {
+          comissoesMap[item.profissional] = item.vl_comissao;
+        });
+        setComissoes(comissoesMap);
+      } catch (err) {
+        console.error("Erro ao carregar comissões:", err);
+      }
+    };
 
-  // Função para calcular a comissão baseada no valor e percentual
-  const calcularComissao = (valor = 0, pctComissao = 0) => {
-    return valor * (pctComissao / 100);
-  };
+    fetchPacientes();
+    fetchComissoes();
+  }, []);
 
   const filteredPacientes = pacientes.filter(paciente =>
     paciente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,11 +73,9 @@ export function GestaoPacientes() {
     if (!acc[paciente.profissional]) {
       acc[paciente.profissional] = 0;
     }
-    acc[paciente.profissional] += paciente.comissao;
+    acc[paciente.profissional] += comissoes[paciente.profissional] || 0;
     return acc;
   }, {});
-
-  // ... restante do componente permanece igual ...
 
   if (loading) {
     return (

@@ -45,7 +45,7 @@ export function Relatorio() {
 
       // Busca os dados da API
       const [tratamentosResponse, metricasResponse] = await Promise.all([
-        axios.get("/api/v1/consultas", {
+        axios.get("http://localhost:3000/api/v1/consultas", {
           params: {
             start_date: startDateISO,
             end_date: endDateISO,
@@ -53,7 +53,7 @@ export function Relatorio() {
             per_page: 10
           }
         }),
-        axios.get("/api/v1/consultas/dashboard", {
+        axios.get("http://localhost:3000/api/v1/consultas/dashboard", {
           params: {
             start_date: startDateISO,
             end_date: endDateISO
@@ -78,7 +78,9 @@ export function Relatorio() {
       const metricasAtualizadas = {
         totalTratamentos: dashboardData.total_tratamentos?.valor || 0,
         valorTotal: dashboardData.receita?.total || 0,
-        mediaPorTratamento: dashboardData.media_tratamento?.valor || 0,
+        mediaPorTratamento: dashboardData.media_tratamento?.valor
+          ? Number(parseFloat(dashboardData.media_tratamento.valor).toFixed(2))
+          : 0,
         tratamentosConcluidos: dashboardData.total_tratamentos?.concluidos || 0,
         tratamentosAgendados: dashboardData.total_tratamentos?.agendados || 0,
         comissaoTotal: dashboardData.receita?.comissoes || 0
@@ -138,41 +140,42 @@ export function Relatorio() {
           <p className="text-gray-600 mb-6">Visualize e exporte dados de tratamentos e comissões</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <CardRelatorio
-              titulo="Total de Tratamentos"
-              subtitulo="Número de procedimentos"
-              valor={metricas.totalTratamentos}
-              infoAdicional={
-                <>
-                  <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-                    {metricas.tratamentosConcluidos} concluídos
-                  </span>
-                  <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
-                    {metricas.tratamentosAgendados} agendados
-                  </span>
-                </>
-              }
-            />
+          <CardRelatorio
+            titulo="Total de Tratamentos"
+            subtitulo="Número de procedimentos"
+            valor={metricas.totalTratamentos}
+            formatarValor={false}
+            infoAdicional={
+              <>
+                <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
+                  {metricas.tratamentosConcluidos} concluídos
+                </span>
+                <span className="px-2 py-1 rounded-full ml-2 bg-blue-100 text-blue-800">
+                  {metricas.tratamentosAgendados} agendados
+                </span>
+              </>
+            }
+          />
 
-            <CardRelatorio
-              titulo="Valor Total"
-              subtitulo="Receita gerada"
-              valor={metricas.valorTotal}
-              infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
-            />
+          <CardRelatorio
+            titulo="Valor Total"
+            subtitulo="Receita gerada"
+            valor={formatarMoeda(metricas.valorTotal)}
+            infoAdicional={`Comissões: ${formatarMoeda(metricas.comissaoTotal)}`}
+          />
 
-            <CardRelatorio
-              titulo="Média por Tratamento"
-              subtitulo="Valor médio"
-              valor={metricas.mediaPorTratamento}
-              infoAdicional={`Período: ${
-                periodo === 'ultima-semana'
-                  ? 'Última semana'
-                  : periodo === 'ultimo-mes'
-                  ? 'Último mês'
-                  : 'Personalizado'
-              }`}
-            />
+          <CardRelatorio
+            titulo="Média por Tratamento"
+            subtitulo="Valor médio"
+            valor={formatarMoeda(metricas.mediaPorTratamento)}
+            infoAdicional={`Período: ${
+              periodo === 'ultima-semana'
+                ? 'Última semana'
+                : periodo === 'ultimo-mes'
+                ? 'Último mês'
+                : 'Personalizado'
+            }`}
+          />
           </div>
 
           <RelatorioTratamentos
