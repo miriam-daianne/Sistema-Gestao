@@ -131,6 +131,17 @@ export function Calc() {
   const margemBruta = valorTotal ? ((valorTotal - custoTotal) / valorTotal) * 100 : 0;
   const margemFinal = valorTotal ? (lucroFinal / valorTotal) * 100 : 0;
 
+  // Update comissoes valor based on valorTotal and fixed commission percentage 2.5%
+  const comissoesAtualizadas = comissoes.map(comissao => ({
+    ...comissao,
+    valor: valorTotal * 0.025
+  }));
+
+  // Update comissoes state with updated values
+  if (JSON.stringify(comissoes) !== JSON.stringify(comissoesAtualizadas)) {
+    setComissoes(comissoesAtualizadas);
+  }
+
   if (loading && pacientes.length === 0) {
     return <p className="text-gray-400 italic">Carregando dados...</p>;
   }
